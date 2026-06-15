@@ -1,9 +1,9 @@
-const CONSOLE_NOTE_BANNER = `
+export const ELEMENTS_NOTE_BANNER = `
     ╔═══════════════════════════════════════════════════════════════════╗
     ║  ♡  ·  ✦  ·        hi i'm mei!        ·  ✦  ♡  ·                 ║
     ║         ─────────────────────────────                             ║
     ║              welcome to my web realm ^_^              ♡  ·  ✦       ║
-    ╚═══════════════════════════════════════════════════════════════════╝`;
+    ╚═══════════════════════════════════════════════════════════════════╝`.trim();
 
 const CONSOLE_NOTE_CUSTOM = `
         ⏔⏔⏔ ꒰ ᧔ෆ᧓ ꒱ ⏔⏔⏔
@@ -48,7 +48,7 @@ const CONSOLE_NOTE_FOOTER = `
     ·  · ♡ ·  ·`;
 
 export function formatConsoleNote(): string {
-  return [CONSOLE_NOTE_BANNER, CONSOLE_NOTE_CUSTOM, CONSOLE_NOTE_FOOTER]
+  return [CONSOLE_NOTE_CUSTOM, CONSOLE_NOTE_FOOTER]
     .map((block) => block.trim())
     .join("\n\n");
 }

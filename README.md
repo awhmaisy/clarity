@@ -31,7 +31,7 @@ o               .        ___---___                    .
     /              home          — my realms
     /cache         cache         — typefaces, music, joy
     /satellite     satellite     — pinboard + goodreads
-    /uploading     upload        — @uploading exhibit hall
+    /upload          upload        — @uploading exhibit hall
 ```
 
 Stream of consciousness, references, and other occupants of my room on the web!

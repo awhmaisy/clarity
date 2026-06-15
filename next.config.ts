@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/uploading",
+        destination: "/upload",
+        permanent: true,
+      },
+      {
         source: "/reading",
         destination: "/satellite",
         permanent: true,

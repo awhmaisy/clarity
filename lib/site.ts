@@ -9,7 +9,7 @@ export const site = {
   uploading: {
     handle: "@uploading",
     url: "https://instagram.com/uploading",
-    page: "/uploading",
+    page: "/upload",
   },
   sayu: process.env.SAYU_URL ?? "https://x.com/descendinight",
 };

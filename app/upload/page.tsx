@@ -16,12 +16,12 @@ const challenges = [
   "Finding the most accurate, first-or-close sources",
 ];
 
-export default function UploadingPage() {
+export default function UploadPage() {
   const { accountUrl } = getUploadingMeta();
 
   return (
     <div className="page">
-      <SiteHeader active="/uploading" />
+      <SiteHeader active="/upload" />
 
       <main className="home-copy">
         <h1 className="page-title text-ink">@uploading</h1>

@@ -5,7 +5,7 @@ const links = [
   { href: "/", label: "home" },
   { href: "/cache", label: "cache" },
   { href: "/satellite", label: "satellite" },
-  { href: "/uploading", label: "upload" },
+  { href: "/upload", label: "upload" },
 ] as const;
 
 export function Nav({ active }: { active?: string }) {

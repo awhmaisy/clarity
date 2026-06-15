@@ -480,3 +480,7 @@ body {
   max-width: 100%;
   width: 100%;
 }
+
+.devtools-elements-note {
+  display: none !important;
+}
