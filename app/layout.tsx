@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { DevToolsNote } from "@/components/devtools-note";
-import { ElementsNote } from "@/components/elements-note";
 import { copernicus, cosmicaMono } from "@/lib/fonts";
+import { elementsNoteScript } from "@/lib/console-note";
 import { siteMetadata } from "@/lib/metadata";
 import "./globals.css";
 
@@ -36,7 +36,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-screen font-serif antialiased">
-        <ElementsNote />
+        <script dangerouslySetInnerHTML={{ __html: elementsNoteScript }} />
         <DevToolsNote />
         {children}
       </body>

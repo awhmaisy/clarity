@@ -5,6 +5,14 @@ export const ELEMENTS_NOTE_BANNER = `
     ║              welcome to my web realm ^_^              ♡  ·  ✦       ║
     ╚═══════════════════════════════════════════════════════════════════╝`.trim();
 
+export const elementsNoteScript = `
+(function () {
+  var art = ${JSON.stringify(ELEMENTS_NOTE_BANNER)};
+  var comment = document.createComment("\\n" + art + "\\n");
+  document.body.insertBefore(comment, document.body.firstChild);
+})();
+`.trim();
+
 const CONSOLE_NOTE_CUSTOM = `
         ⏔⏔⏔ ꒰ ᧔ෆ᧓ ꒱ ⏔⏔⏔
 
