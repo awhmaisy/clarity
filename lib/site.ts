@@ -1,5 +1,6 @@
 export const site = {
   name: "Mei Higashi",
+  url: "https://meihigashi.com",
   email: process.env.SITE_EMAIL ?? "m@meihigashi.com",
   x: {
     handle: "@mtheory",

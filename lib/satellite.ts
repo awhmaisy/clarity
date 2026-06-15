@@ -1,4 +1,5 @@
 import { unstable_cache } from "next/cache";
+import { GOODREADS_RSS_URL } from "./goodreads-config";
 import { fetchPinboardItems } from "./pinboard";
 import { fetchRss, type RssItem } from "./rss";
 import { normalizeSatelliteTitle } from "./satellite-format";
@@ -14,14 +15,6 @@ export interface SatelliteItem {
 }
 
 export const SATELLITE_PAGE_SIZE = 8;
-
-function parseUrls(envValue?: string): string[] {
-  if (!envValue) return [];
-  return envValue
-    .split(",")
-    .map((url) => url.trim())
-    .filter(Boolean);
-}
 
 function parseGoodreadsTitle(raw: string): string {
   const patterns = [
@@ -97,34 +90,37 @@ function deserializeItems(
 const getCachedPinboardItems = unstable_cache(
   async () => {
     const items = await fetchPinboardItems();
+    if (items.length === 0) {
+      throw new Error("Pinboard unavailable");
+    }
+
     return items.map((item) => ({
       ...item,
       date: item.date.getTime(),
     }));
   },
-  ["satellite-pinboard-v3"],
+  ["satellite-pinboard-v4"],
   { revalidate: 600 },
 );
 
 const getCachedGoodreadsItems = unstable_cache(
   async () => {
-    const urls = parseUrls(process.env.GOODREADS_RSS_URL);
-    const items = await loadSource(urls, normalizeGoodreads);
+    const items = await loadSource([GOODREADS_RSS_URL], normalizeGoodreads);
     return items.map((item) => ({
       ...item,
       date: item.date.getTime(),
     }));
   },
-  ["satellite-goodreads"],
+  ["satellite-goodreads-v2"],
   { revalidate: 3600 },
 );
 
 async function getPinboardItems(): Promise<SatelliteItem[]> {
-  const cached = await getCachedPinboardItems();
-  const items = deserializeItems(cached);
-  if (items.length > 0) return items;
-
-  return fetchPinboardItems();
+  try {
+    return deserializeItems(await getCachedPinboardItems());
+  } catch {
+    return fetchPinboardItems();
+  }
 }
 
 async function getGoodreadsItems(): Promise<SatelliteItem[]> {

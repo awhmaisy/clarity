@@ -1,11 +1,15 @@
+import { PINBOARD_FEED_URLS, PINBOARD_PROFILE_URL } from "./pinboard-config";
 import { parseRss, type RssItem } from "./rss";
 import { normalizeSatelliteTitle } from "./satellite-format";
 import type { SatelliteItem } from "./satellite";
 
-const PINBOARD_FETCH_TIMEOUT_MS = 120_000;
+const PINBOARD_FETCH_TIMEOUT_MS = 12_000;
 const PINBOARD_FEED_MAX = 400;
-const PINBOARD_FETCH_RETRIES = 12;
-const PINBOARD_FETCH_RETRY_DELAY_MS = 2000;
+const PINBOARD_FETCH_RETRIES = 3;
+const PINBOARD_FETCH_RETRY_DELAY_MS = 750;
+
+const BROWSER_USER_AGENT =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
 interface PinboardJsonPost {
   href?: string;
@@ -16,10 +20,6 @@ interface PinboardJsonPost {
   dt?: string;
   hash?: string;
   h?: string;
-}
-
-interface PinboardApiResponse {
-  posts?: PinboardJsonPost[];
 }
 
 function normalizePinboardJsonPost(post: PinboardJsonPost) {
@@ -42,7 +42,9 @@ function normalizePinboardJsonPost(post: PinboardJsonPost) {
     date,
   };
 }
+
 type PinboardPostList = PinboardJsonPost[];
+
 function parsePinboardPosts(posts: PinboardPostList): SatelliteItem[] {
   const items: SatelliteItem[] = [];
 
@@ -62,37 +64,36 @@ function parsePinboardPosts(posts: PinboardPostList): SatelliteItem[] {
   return items.sort((a, b) => b.date.getTime() - a.date.getTime());
 }
 
+function withFeedCount(url: string): string {
+  const parsed = new URL(url);
+  if (!parsed.searchParams.has("count")) {
+    parsed.searchParams.set("count", String(PINBOARD_FEED_MAX));
+  }
+  return parsed.toString();
+}
+
 function feedUrlToJson(url: string): string {
   const jsonUrl = url.includes("/json/")
     ? url
     : url.replace("/rss/", "/json/");
-
-  const parsed = new URL(jsonUrl);
-  if (!parsed.searchParams.has("count")) {
-    parsed.searchParams.set("count", String(PINBOARD_FEED_MAX));
-  }
-
-  return parsed.toString();
+  return withFeedCount(jsonUrl);
 }
 
 function feedUrlToRss(url: string): string {
   const rssUrl = url.includes("/rss/")
     ? url
     : url.replace("/json/", "/rss/");
-
-  const parsed = new URL(rssUrl);
-  if (!parsed.searchParams.has("count")) {
-    parsed.searchParams.set("count", String(PINBOARD_FEED_MAX));
-  }
-
-  return parsed.toString();
+  return withFeedCount(rssUrl);
 }
 
 async function sleep(ms: number): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function fetchPinboardFeedText(url: string): Promise<string> {
+async function fetchPinboardFeedText(
+  url: string,
+  userAgent = "clarity-satellite/1.0",
+): Promise<string> {
   let lastError: Error | undefined;
 
   for (let attempt = 0; attempt < PINBOARD_FETCH_RETRIES; attempt += 1) {
@@ -101,8 +102,8 @@ async function fetchPinboardFeedText(url: string): Promise<string> {
         cache: "no-store",
         headers: {
           Accept:
-            "application/rss+xml, application/xml, text/xml, application/json, text/plain",
-          "User-Agent": "clarity-satellite/1.0",
+            "application/rss+xml, application/xml, text/xml, application/json, text/plain, text/html",
+          "User-Agent": userAgent,
         },
         signal: AbortSignal.timeout(PINBOARD_FETCH_TIMEOUT_MS),
       });
@@ -112,8 +113,12 @@ async function fetchPinboardFeedText(url: string): Promise<string> {
         throw new Error(`Pinboard feed failed (${response.status})`);
       }
 
-      if (!text.trim().startsWith("<") && !text.trim().startsWith("[")) {
+      if (text.includes("service is not available")) {
         throw new Error("Pinboard feed unavailable");
+      }
+
+      if (!text.trim()) {
+        throw new Error("Pinboard feed empty");
       }
 
       return text;
@@ -191,7 +196,12 @@ function parsePinboardRssXml(xml: string): SatelliteItem[] {
 
 async function fetchPinboardJson(url: string): Promise<SatelliteItem[]> {
   const text = await fetchPinboardFeedText(feedUrlToJson(url));
-  const data = JSON.parse(text) as PinboardJsonPost[] | PinboardApiResponse;
+  const trimmed = text.trim();
+  if (!trimmed.startsWith("[") && !trimmed.startsWith("{")) {
+    throw new Error("Pinboard JSON feed unavailable");
+  }
+
+  const data = JSON.parse(trimmed) as PinboardJsonPost[] | { posts?: PinboardJsonPost[] };
   const posts = Array.isArray(data) ? data : (data.posts ?? []);
   return parsePinboardPosts(posts);
 }
@@ -199,25 +209,6 @@ async function fetchPinboardJson(url: string): Promise<SatelliteItem[]> {
 async function fetchPinboardRss(url: string): Promise<SatelliteItem[]> {
   const text = await fetchPinboardFeedText(feedUrlToRss(url));
   return parsePinboardRssXml(text);
-}
-
-async function fetchPinboardApi(authToken: string): Promise<SatelliteItem[]> {
-  const url = new URL("https://api.pinboard.in/v1/posts/all");
-  url.searchParams.set("format", "json");
-  url.searchParams.set("auth_token", authToken);
-
-  const response = await fetch(url.toString(), {
-    cache: "no-store",
-    headers: { "User-Agent": "clarity-satellite/1.0" },
-    signal: AbortSignal.timeout(PINBOARD_FETCH_TIMEOUT_MS),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Pinboard API failed (${response.status})`);
-  }
-
-  const data = (await response.json()) as PinboardApiResponse;
-  return parsePinboardPosts(data.posts ?? []);
 }
 
 async function fetchPinboardFromFeedUrl(url: string): Promise<SatelliteItem[]> {
@@ -231,36 +222,69 @@ async function fetchPinboardFromFeedUrl(url: string): Promise<SatelliteItem[]> {
   return fetchPinboardRss(url);
 }
 
-export async function fetchPinboardItems(): Promise<SatelliteItem[]> {
-  const apiToken = process.env.PINBOARD_API_TOKEN?.trim();
-  const feedUrls = (process.env.PINBOARD_RSS_URL ?? "")
-    .split(",")
-    .map((url) => url.trim())
-    .filter(Boolean);
-
-  if (apiToken) {
-    try {
-      return await fetchPinboardApi(apiToken);
-    } catch {
-      // Fall through to feed URLs if the API is rate-limited or unavailable.
-    }
-  }
-
-  if (feedUrls.length === 0) return [];
+function parsePinboardProfileHtml(html: string): SatelliteItem[] {
+  if (html.includes("annoying captcha")) return [];
 
   const items: SatelliteItem[] = [];
   const seen = new Set<string>();
+  const bookmarkPattern =
+    /<div class="bookmark" id="([^"]+)"[\s\S]*?<a class="bookmark_title\s*"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi;
 
-  for (const url of feedUrls) {
+  for (const match of html.matchAll(bookmarkPattern)) {
+    const [, hash, url, rawTitle] = match;
+    if (!url || seen.has(url)) continue;
+    if (!url.startsWith("http")) continue;
+
+    const title = rawTitle.replace(/<[^>]+>/g, "").trim();
+    if (!title) continue;
+
+    seen.add(url);
+    items.push({
+      id: `pinboard-${hash ?? url}-${items.length}`,
+      source: "pinboard",
+      title: normalizeSatelliteTitle(title),
+      url,
+      date: new Date(0),
+    });
+  }
+
+  return items;
+}
+
+async function scrapePinboardProfile(
+  profileUrl: string,
+): Promise<SatelliteItem[]> {
+  const html = await fetchPinboardFeedText(profileUrl, BROWSER_USER_AGENT);
+  return parsePinboardProfileHtml(html);
+}
+
+export async function fetchPinboardItems(): Promise<SatelliteItem[]> {
+  const items: SatelliteItem[] = [];
+  const seen = new Set<string>();
+
+  function addItems(fetched: SatelliteItem[]) {
+    for (const item of fetched) {
+      if (seen.has(item.url)) continue;
+      seen.add(item.url);
+      items.push(item);
+    }
+  }
+
+  for (const url of PINBOARD_FEED_URLS) {
     try {
       const fetched = await fetchPinboardFromFeedUrl(url);
-      for (const item of fetched) {
-        if (seen.has(item.url)) continue;
-        seen.add(item.url);
-        items.push(item);
-      }
+      addItems(fetched);
+      if (items.length > 0) break;
     } catch {
       continue;
+    }
+  }
+
+  if (items.length === 0) {
+    try {
+      addItems(await scrapePinboardProfile(PINBOARD_PROFILE_URL));
+    } catch {
+      // Profile scrape is a last resort when feeds fail.
     }
   }
 

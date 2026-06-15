@@ -1,15 +1,10 @@
 import type { Metadata } from "next";
+import { DevToolsNote } from "@/components/devtools-note";
 import { copernicus, cosmicaMono } from "@/lib/fonts";
+import { siteMetadata } from "@/lib/metadata";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: {
-    default: "Mei Higashi",
-    template: "%s — Mei Higashi",
-  },
-  description:
-    "Narrative architect and design internet personas. Stream of consciousness, worldview, and writing.",
-};
+export const metadata: Metadata = siteMetadata;
 
 const themeScript = `
 (function () {
@@ -40,6 +35,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-screen font-serif antialiased">
+        <DevToolsNote />
         {children}
       </body>
     </html>

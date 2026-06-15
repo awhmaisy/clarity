@@ -1,9 +1,9 @@
 
 ```
     ╔═══════════════════════════════════════════════════════════════════╗
-    ║  ·  ·  ✦  ·     C L A R I T Y     ✦  ·  ·  ·                      ║
+    ║  ♡  ·  ✦  ·        hi i'm mei!        ·  ✦  ♡  ·                 ║
     ║         ─────────────────────────────                             ║
-    ║              personal site of mei higashi                         ║
+    ║              welcome to my web realm ^_^              ♡  ·  ✦       ║
     ╚═══════════════════════════════════════════════════════════════════╝
 
 o               .        ___---___                    .
@@ -21,6 +21,8 @@ o               .        ___---___                    .
     |    .          ~\ \   .      /  /~          o
   .                   ~--___ ; ___--~
                  .          ---         .              -JT
+
+        ⏔⏔⏔ ꒰ ᧔ෆ᧓ ꒱ ⏔⏔⏔
 ```
 
 ## what lives here
@@ -34,19 +36,10 @@ o               .        ___---___                    .
 
 Stream of consciousness, references, and other occupants of my room on the web!
 
+```
+        ⏔⏔⏔ ꒰ ᧔ෆ᧓ ꒱ ⏔⏔⏔
+```
+
 ## type
 
 Set in **Copernicus** and **Cosmica Mono** by [Labor and Wait](https://www.laborandwait.xyz/).
-
----
-
-```
-         ✦
-        /|\       may the signal stay clear
-       / | \      and the noise fall away
-      *  ·  *
-         |
-    ·  · ♥ ·  ·
-```
-
-★ clarity · meihigashi.com ★

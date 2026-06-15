@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
+import { pageMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "Cache",
-  description: "Stored lists, notes, and references.",
-};
+export const metadata: Metadata = pageMetadata(
+  "Cache",
+  "Stored lists, notes, and references.",
+);
 
 const typefaces = [
   {

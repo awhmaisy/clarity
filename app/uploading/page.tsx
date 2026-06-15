@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
 import { cosmicaMono } from "@/lib/fonts";
+import { pageMetadata } from "@/lib/metadata";
 import { getUploadingMeta } from "@/lib/uploading";
 
-export const metadata: Metadata = {
-  title: "@uploading",
-  description:
-    "A hobbyist exhibit hall for personal interests: quantum science, cosmology, and whatever else at whim.",
-};
+export const metadata: Metadata = pageMetadata(
+  "@uploading",
+  "A hobbyist exhibit hall for personal interests: quantum science, cosmology, and whatever else at whim.",
+);
 
 const challenges = [
   "Keeping videos under 2 minutes",

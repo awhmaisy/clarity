@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import { SatelliteColumns } from "@/components/satellite-columns";
 import { SatellitePagination } from "@/components/satellite-pagination";
 import { SiteHeader } from "@/components/site-header";
+import { pageMetadata } from "@/lib/metadata";
 import { getProfileLinks } from "@/lib/profiles";
 import { getSatellitePage } from "@/lib/satellite";
 
-export const metadata: Metadata = {
-  title: "Satellite",
-  description: "A live log of bookmarks and books.",
-};
+export const metadata: Metadata = pageMetadata(
+  "Satellite",
+  "A live log of bookmarks and books.",
+);
 
 export const revalidate = 600;
 

@@ -3,7 +3,7 @@ import { Nav } from "./nav";
 
 export function SiteHeader({ active }: { active?: string }) {
   return (
-    <header className="site-header flex flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8">
+    <header className="site-header flex flex-col gap-8 sm:flex-row sm:items-baseline sm:justify-between">
       <Link href="/" className="site-logo text-ink">
         mei higashi
       </Link>

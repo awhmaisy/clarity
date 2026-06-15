@@ -11,7 +11,7 @@ const links = [
 export function Nav({ active }: { active?: string }) {
   return (
     <nav aria-label="Main">
-      <ul className="site-nav flex flex-wrap items-baseline gap-x-3 gap-y-1 sm:gap-x-4 sm:gap-y-2">
+      <ul className="site-nav flex flex-wrap items-baseline gap-x-4 gap-y-2">
         {links.map(({ href, label }) => (
           <li key={href}>
             <Link
