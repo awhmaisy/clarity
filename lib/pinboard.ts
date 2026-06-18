@@ -3,10 +3,11 @@ import { parseRss, type RssItem } from "./rss";
 import { normalizeSatelliteTitle } from "./satellite-format";
 import type { SatelliteItem } from "./satellite";
 
-const PINBOARD_FETCH_TIMEOUT_MS = 12_000;
+const PINBOARD_FETCH_TIMEOUT_MS = 5_000;
 const PINBOARD_FEED_MAX = 400;
-const PINBOARD_FETCH_RETRIES = 3;
-const PINBOARD_FETCH_RETRY_DELAY_MS = 750;
+const PINBOARD_FETCH_RETRIES = 2;
+const PINBOARD_FETCH_RETRY_DELAY_MS = 400;
+const PINBOARD_TOTAL_BUDGET_MS = 8_000;
 
 const BROWSER_USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
@@ -259,34 +260,47 @@ async function scrapePinboardProfile(
 }
 
 export async function fetchPinboardItems(): Promise<SatelliteItem[]> {
-  const items: SatelliteItem[] = [];
-  const seen = new Set<string>();
+  const fetchFeeds = async (): Promise<SatelliteItem[]> => {
+    const items: SatelliteItem[] = [];
+    const seen = new Set<string>();
 
-  function addItems(fetched: SatelliteItem[]) {
-    for (const item of fetched) {
-      if (seen.has(item.url)) continue;
-      seen.add(item.url);
-      items.push(item);
+    function addItems(fetched: SatelliteItem[]) {
+      for (const item of fetched) {
+        if (seen.has(item.url)) continue;
+        seen.add(item.url);
+        items.push(item);
+      }
     }
-  }
 
-  for (const url of PINBOARD_FEED_URLS) {
-    try {
-      const fetched = await fetchPinboardFromFeedUrl(url);
-      addItems(fetched);
-      if (items.length > 0) break;
-    } catch {
-      continue;
+    const results = await Promise.allSettled(
+      PINBOARD_FEED_URLS.map((url) => fetchPinboardFromFeedUrl(url)),
+    );
+
+    for (const result of results) {
+      if (result.status === "fulfilled") {
+        addItems(result.value);
+      }
     }
-  }
 
-  if (items.length === 0) {
-    try {
-      addItems(await scrapePinboardProfile(PINBOARD_PROFILE_URL));
-    } catch {
-      // Profile scrape is a last resort when feeds fail.
+    if (items.length === 0) {
+      try {
+        addItems(await scrapePinboardProfile(PINBOARD_PROFILE_URL));
+      } catch {
+        // Profile scrape is a last resort when feeds fail.
+      }
     }
-  }
 
-  return items.sort((a, b) => b.date.getTime() - a.date.getTime());
+    return items.sort((a, b) => b.date.getTime() - a.date.getTime());
+  };
+
+  try {
+    return await Promise.race([
+      fetchFeeds(),
+      new Promise<SatelliteItem[]>((resolve) => {
+        setTimeout(() => resolve([]), PINBOARD_TOTAL_BUDGET_MS);
+      }),
+    ]);
+  } catch {
+    return [];
+  }
 }

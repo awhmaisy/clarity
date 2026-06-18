@@ -12,6 +12,7 @@ export const metadata: Metadata = pageMetadata(
 );
 
 export const revalidate = 600;
+export const maxDuration = 30;
 
 export default async function SatellitePage({
   searchParams,

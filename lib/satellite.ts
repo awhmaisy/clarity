@@ -15,6 +15,7 @@ export interface SatelliteItem {
 }
 
 export const SATELLITE_PAGE_SIZE = 8;
+const SATELLITE_FETCH_BUDGET_MS = 8_000;
 
 function parseGoodreadsTitle(raw: string): string {
   const patterns = [
@@ -87,44 +88,61 @@ function deserializeItems(
   }));
 }
 
-const getCachedPinboardItems = unstable_cache(
-  async () => {
-    const items = await fetchPinboardItems();
-    if (items.length === 0) {
-      throw new Error("Pinboard unavailable");
-    }
+function serializeItems(items: SatelliteItem[]) {
+  return items.map((item) => ({
+    ...item,
+    date: item.date.getTime(),
+  }));
+}
 
-    return items.map((item) => ({
-      ...item,
-      date: item.date.getTime(),
-    }));
-  },
-  ["satellite-pinboard-v4"],
+async function withFetchBudget<T>(
+  label: string,
+  fetcher: () => Promise<T>,
+  fallback: T,
+): Promise<T> {
+  try {
+    return await Promise.race([
+      fetcher(),
+      new Promise<T>((resolve) => {
+        setTimeout(() => resolve(fallback), SATELLITE_FETCH_BUDGET_MS);
+      }),
+    ]);
+  } catch (error) {
+    console.error(`[satellite] ${label} failed`, error);
+    return fallback;
+  }
+}
+
+const getCachedPinboardItems = unstable_cache(
+  async () => serializeItems(await fetchPinboardItems()),
+  ["satellite-pinboard-v5"],
   { revalidate: 600 },
 );
 
 const getCachedGoodreadsItems = unstable_cache(
-  async () => {
-    const items = await loadSource([GOODREADS_RSS_URL], normalizeGoodreads);
-    return items.map((item) => ({
-      ...item,
-      date: item.date.getTime(),
-    }));
-  },
-  ["satellite-goodreads-v2"],
+  async () =>
+    serializeItems(
+      await loadSource([GOODREADS_RSS_URL], normalizeGoodreads),
+    ),
+  ["satellite-goodreads-v3"],
   { revalidate: 3600 },
 );
 
 async function getPinboardItems(): Promise<SatelliteItem[]> {
-  try {
-    return deserializeItems(await getCachedPinboardItems());
-  } catch {
-    return fetchPinboardItems();
-  }
+  const cached = await withFetchBudget(
+    "pinboard cache",
+    () => getCachedPinboardItems(),
+    [],
+  );
+  return deserializeItems(cached);
 }
 
 async function getGoodreadsItems(): Promise<SatelliteItem[]> {
-  const cached = await getCachedGoodreadsItems();
+  const cached = await withFetchBudget(
+    "goodreads cache",
+    () => getCachedGoodreadsItems(),
+    [],
+  );
   return deserializeItems(cached);
 }
 
