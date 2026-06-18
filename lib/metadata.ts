@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { site } from "./site";
 
 export const siteDescription =
-  "Narrative architect and persona designer. Stream of consciousness, references, and other occupants of my room on the web.";
+  "Hello, with all my delight!";
 
 export const ogImage = {
-  url: "/opengraph-image",
-  width: 1200,
-  height: 630,
-  alt: "Mei Higashi — narrative architect and persona designer",
+  url: "/images/sayu-mei.JPG",
+  width: 1010,
+  height: 1532,
+  alt: "An empress with her wolf familiar and a crow under a full moon",
 } as const;
 
 export const siteMetadata: Metadata = {
