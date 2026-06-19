@@ -36,9 +36,9 @@ export function HomePhotoToggle() {
             >
               sayu
             </a>
-            , picturing a
+            , picturing a warrior-maiden
             <br />
-            warrior-maiden and her wolf on the full moon
+            and her wolf on the full moon
           </figcaption>
         </figure>
       ) : null}
