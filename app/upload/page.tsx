@@ -40,7 +40,7 @@ export default function UploadPage() {
           <figcaption
             className={`home-photo-caption home-photo-caption--uploading ${cosmicaMono.className}`}
           >
-            excavating the resonant information that shapes our
+            excavating the resonant information that shapes our{" "}
             <br />
             reality. bekenstein, &rsquo;t hooft &amp; susskind.
           </figcaption>

@@ -25,7 +25,7 @@ export default function Home() {
               >
                 Da Vinci <br /> Innovation Academy
               </a>
-              , where I researched nanotechnology and <br />oncology at{" "}
+              , where I researched nanotechnology and <br /> oncology at{" "}
               <a
                 href="https://stemcell.ucla.edu/"
                 className="link"
@@ -89,35 +89,6 @@ export default function Home() {
                   rel="noopener noreferrer"
                 >
                   X Dot Com
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://meihigashi.com"
-                  className="link"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Substack
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://instagram.com/0xmaisy"
-                  className="link"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Finance-gram
-                </a>
-                {" / "}
-                <a
-                  href="https://instagram.com/uploading"
-                  className="link"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Mei-gram
                 </a>
               </li>
               <li>
