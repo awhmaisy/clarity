@@ -1,11 +1,14 @@
 import Link from "next/link";
+import { site } from "@/lib/site";
 import { ThemeToggle } from "./theme-toggle";
 
 const links = [
   { href: "/", label: "home" },
   { href: "/cache", label: "cache" },
   { href: "/satellite", label: "satellite" },
-  { href: "/upload", label: "upload" },
+  ...(site.uploading.visible
+    ? [{ href: site.uploading.page, label: "upload" } as const]
+    : []),
 ] as const;
 
 export function Nav({ active }: { active?: string }) {

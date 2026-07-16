@@ -7,6 +7,7 @@ export const site = {
     url: "https://x.com/mtheory",
   },
   uploading: {
+    visible: false,
     handle: "@uploading",
     url: "https://instagram.com/uploading",
     page: "/upload",

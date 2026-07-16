@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { cosmicaMono } from "@/lib/fonts";
 import { pageMetadata } from "@/lib/metadata";
+import { site } from "@/lib/site";
 import { getUploadingMeta } from "@/lib/uploading";
 
 export const metadata: Metadata = pageMetadata(
@@ -17,6 +19,8 @@ const challenges = [
 ];
 
 export default function UploadPage() {
+  if (!site.uploading.visible) notFound();
+
   const { accountUrl } = getUploadingMeta();
 
   return (
