@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/react";
 import { DevToolsNote } from "@/components/devtools-note";
 import { copernicus, cosmicaMono } from "@/lib/fonts";
 import { elementsNoteScript } from "@/lib/console-note";
@@ -36,6 +37,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: elementsNoteScript }} />
         <DevToolsNote />
         {children}
+        <Analytics />
       </body>
     </html>
   );
