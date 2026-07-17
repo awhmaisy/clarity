@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/react";
+import { Analytics } from "@vercel/analytics/next";
 import { DevToolsNote } from "@/components/devtools-note";
 import { copernicus, cosmicaMono } from "@/lib/fonts";
 import { elementsNoteScript } from "@/lib/console-note";
